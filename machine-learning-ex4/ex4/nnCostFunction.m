@@ -61,18 +61,18 @@ Theta2_grad = zeros(size(Theta2));
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
-z2= [ones(m,1) X ];
-z2 = z2*Theta1';
-g2 = sigmoid(z2);
-z3 = [ones(m,1) g2 ];
-z3 = z3*Theta2';
-g3 = sigmoid(z3);
+a1 = [ones(m,1) X];
+z2 = a1 * Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(m,1) a2];
+z3 = a2*Theta2';
+a3 = sigmoid(z3);
 answer = 0;
 for i = 1:m
 temp = zeros(num_labels,1);
 temp2 = y(i,1);
 temp(temp2,1) = 1;
-h=g3(i,:);
+h=a3(i,:);
 answer = answer + sum(-temp.*log(h)' - (1-temp).*log(1-h)');
 end
 J = (1/m)*answer;
@@ -80,37 +80,37 @@ J = (1/m)*answer;
 J = J + (lambda/2/m)*(sum(sum(Theta1(:,2:size(Theta1,2)).^2)) + sum(sum(Theta2(:,2:size(Theta2,2)).^2)));
 %backpropagation
 
+
+
+a1 = [ones(m,1) X];
+z2 = a1 * Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(m,1) a2];
 delta3 = zeros(m,num_labels);
 delta2 = zeros(m,size(Theta1,1)+1);
 z2 = [ones(m,1) z2];
 for t = 1:m
 temp = zeros(num_labels,1);
-temp2 = y(i,1);
+temp2 = y(t,1);
 temp(temp2,1) = 1;
-delta3(t,:) = g3(t,:)' - temp;
+delta3(t,:) = a3(t,:)' - temp;
 end
 for t = 1:m;
-temp = zeros(num_labels,1);
-temp2 = y(i,1);
-temp(temp2,1) = 1;
 delta2(t,:) = delta3(t,:) * Theta2 .* sigmoidGradient(z2(t,:));
 end
-               delta2 = delta2(:,2:end);
-a1 = [ones(m,1) X];
-a2 = z2;
-a2 = sigmoid(a2);
+delta2 = delta2(:,2:end);
 for t = 1:m
 Theta1_grad = Theta1_grad + delta2(t,:)'*a1(t,:);
 end
-               Theta1_grad = (1/m)*Theta1_grad;
+Theta1_grad = (1/m)*Theta1_grad;
 for t = 1:m
 Theta2_grad = Theta2_grad + delta3(t,:)'*a2(t,:);
 end
 Theta2_grad = (1/m)*Theta2_grad;
 
 
-
-
+Theta1_grad(:,2:end) = Theta1_grad(:,2:end) + (lambda/m)*Theta1(:,2:end);
+Theta2_grad(:,2:end) = Theta2_grad(:,2:end) + (lambda/m)*Theta2(:,2:end);
 
 
 
